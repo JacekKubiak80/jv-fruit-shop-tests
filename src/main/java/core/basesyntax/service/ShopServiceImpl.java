@@ -24,8 +24,7 @@ public class ShopServiceImpl implements ShopService {
             throw new RuntimeException("Transaction list cannot be null");
         }
 
-        for (int i = 0; i < transactions.size(); i++) {
-            FruitTransaction transaction = transactions.get(i);
+        for (FruitTransaction transaction : transactions) {
             if (transaction == null) {
                 throw new RuntimeException("Transaction cannot be null");
             }
@@ -36,10 +35,6 @@ public class ShopServiceImpl implements ShopService {
             }
 
             OperationHandler handler = strategy.getHandler(operation);
-            if (handler == null) {
-                throw new RuntimeException(
-                        "No handler found for operation: " + operation);
-            }
 
             handler.handle(transaction, stock);
         }

@@ -4,32 +4,67 @@ import core.basesyntax.model.FruitTransaction;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class PurchaseOperationTest {
+    private PurchaseOperation purchase;
+    private Map<String, Integer> stock;
 
-    @Test
-    void handle_enoughStock_ok() {
-        Map<String, Integer> stock = new HashMap<>();
-        stock.put("apple", 50);
-
-        FruitTransaction tx = new FruitTransaction(
-                FruitTransaction.Operation.PURCHASE, "apple", 20);
-
-        new PurchaseOperation().handle(tx, stock);
-
-        Assertions.assertEquals(30, stock.get("apple"));
+    @BeforeEach
+    void setUp() {
+        purchase = new PurchaseOperation();
+        stock = new HashMap<>();
+        stock.put("apple", 10);
     }
 
     @Test
-    void handle_notEnoughStock_throwsException() {
-        Map<String, Integer> stock = Map.of("apple", 10);
+    void handle_purchaseReducesStock() {
+        FruitTransaction transaction = new FruitTransaction(FruitTransaction.Operation.PURCHASE,
+                "apple", 5);
+        purchase.handle(transaction, stock);
+        Assertions.assertEquals(5, stock.get("apple"));
+    }
 
-        FruitTransaction tx = new FruitTransaction(
-                FruitTransaction.Operation.PURCHASE, "apple", 20);
+    @Test
+    void handle_purchaseMoreThanStock_throwsException() {
+        FruitTransaction transaction = new FruitTransaction(FruitTransaction.Operation.PURCHASE,
+                "apple", 15);
 
-        Assertions.assertThrows(RuntimeException.class,
-                () -> new PurchaseOperation().handle(tx, new HashMap<>(stock)));
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                () -> purchase.handle(transaction, stock));
+
+        Assertions.assertEquals(
+                "Insufficient stock for purchase: fruit=apple, requested=15, available=10",
+                exception.getMessage());
+    }
+
+    @Test
+    void handle_nullTransaction_throwsException() {
+        Assertions.assertThrows(RuntimeException.class, () -> purchase.handle(null, stock));
+    }
+
+    @Test
+    void handle_nullStock_throwsException() {
+        FruitTransaction transaction = new FruitTransaction(FruitTransaction.Operation.PURCHASE,
+                "apple", 5);
+        Assertions.assertThrows(RuntimeException.class, () -> purchase.handle(transaction, null));
+    }
+
+    @Test
+    void handle_nullFruit_throwsException() {
+        FruitTransaction transaction = new FruitTransaction(FruitTransaction.Operation.PURCHASE,
+                null, 5);
+        Assertions.assertThrows(RuntimeException.class, () -> purchase.handle(transaction, stock));
+    }
+
+    @Test
+    void handle_negativeQuantity_throwsException() {
+        FruitTransaction transaction = new FruitTransaction(FruitTransaction.Operation.PURCHASE,
+                "apple", -5);
+        Assertions.assertThrows(RuntimeException.class, () -> purchase.handle(transaction, stock));
     }
 }
+
+
 

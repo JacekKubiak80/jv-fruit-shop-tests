@@ -7,6 +7,7 @@ import core.basesyntax.strategy.OperationStrategyImpl;
 import core.basesyntax.strategy.PurchaseOperation;
 import core.basesyntax.strategy.ReturnOperation;
 import core.basesyntax.strategy.SupplyOperation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -49,10 +50,9 @@ class ShopServiceImplTest {
 
     @Test
     void process_nullTransactionInList_throwsException() {
-        List<FruitTransaction> transactions = List.of(
-                new FruitTransaction(FruitTransaction.Operation.BALANCE, "apple", 50),
-                null
-        );
+        List<FruitTransaction> transactions = new ArrayList<>();
+        transactions.add(new FruitTransaction(FruitTransaction.Operation.BALANCE, "apple", 50));
+        transactions.add(null);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
                 () -> shopService.process(transactions));
@@ -62,6 +62,79 @@ class ShopServiceImplTest {
     @Test
     void getCurrentStock_emptyInitially_ok() {
         Assertions.assertTrue(shopService.getCurrentStock().isEmpty());
+    }
+
+    @Test
+    void process_transactionWithNullOperation_throwsException() {
+        FruitTransaction transaction = new FruitTransaction(null, "apple", 10);
+        List<FruitTransaction> transactions = new ArrayList<>();
+        transactions.add(transaction);
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                () -> shopService.process(transactions));
+        Assertions.assertEquals("Operation cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void process_transactionWithInvalidFruitOrQuantity_throwsException() {
+        List<FruitTransaction> transactions = List.of(
+                new FruitTransaction(FruitTransaction.Operation.BALANCE, null, 10),
+                new FruitTransaction(FruitTransaction.Operation.SUPPLY, "banana", -5)
+        );
+
+        for (FruitTransaction t : transactions) {
+            if (t != null) {
+                RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                        () -> shopService.process(List.of(t)));
+                System.out.println(exception.getMessage());
+            }
+        }
+    }
+
+    @Test
+    void purchaseWithInsufficientStock_throwsException() {
+        List<FruitTransaction> transactions = List.of(
+                new FruitTransaction(FruitTransaction.Operation.BALANCE, "apple", 5),
+                new FruitTransaction(FruitTransaction.Operation.PURCHASE, "apple", 10)
+        );
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                () -> shopService.process(transactions));
+        Assertions.assertTrue(exception.getMessage().contains("Insufficient stock"));
+    }
+
+    @Test
+    void process_purchaseMoreThanStock_throwsException() {
+        List<FruitTransaction> transactions = List.of(
+                new FruitTransaction(FruitTransaction.Operation.BALANCE, "apple", 5),
+                new FruitTransaction(FruitTransaction.Operation.PURCHASE, "apple", 10)
+        );
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                () -> shopService.process(transactions));
+        Assertions.assertTrue(exception.getMessage().contains("Insufficient stock"));
+    }
+
+    @Test
+    void process_nullFruitName_throwsException() {
+        List<FruitTransaction> transactions = List.of(
+                new FruitTransaction(FruitTransaction.Operation.SUPPLY, null, 10)
+        );
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                () -> shopService.process(transactions));
+        Assertions.assertEquals("Fruit name cannot be null or empty", exception.getMessage());
+    }
+
+    @Test
+    void process_negativeQuantity_throwsException() {
+        List<FruitTransaction> transactions = List.of(
+                new FruitTransaction(FruitTransaction.Operation.SUPPLY, "apple", -5)
+        );
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                () -> shopService.process(transactions));
+        Assertions.assertEquals("Quantity must be a non-negative integer", exception.getMessage());
     }
 }
 
