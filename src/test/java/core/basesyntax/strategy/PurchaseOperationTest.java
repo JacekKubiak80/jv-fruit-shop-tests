@@ -1,10 +1,10 @@
 package core.basesyntax.strategy;
 
 import core.basesyntax.model.FruitTransaction;
-import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class PurchaseOperationTest {
 
@@ -18,7 +18,7 @@ class PurchaseOperationTest {
 
         new PurchaseOperation().handle(tx, stock);
 
-        assertEquals(30, stock.get("apple"));
+        Assertions.assertEquals(30, stock.get("apple"));
     }
 
     @Test
@@ -28,7 +28,8 @@ class PurchaseOperationTest {
         FruitTransaction tx = new FruitTransaction(
                 FruitTransaction.Operation.PURCHASE, "apple", 20);
 
-        assertThrows(RuntimeException.class,
+        Assertions.assertThrows(RuntimeException.class,
                 () -> new PurchaseOperation().handle(tx, new HashMap<>(stock)));
     }
 }
+

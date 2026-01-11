@@ -1,9 +1,9 @@
 package core.basesyntax.strategy;
 
 import core.basesyntax.model.FruitTransaction;
-import org.junit.jupiter.api.Test;
 import java.util.Map;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class OperationStrategyImplTest {
 
@@ -14,7 +14,7 @@ class OperationStrategyImplTest {
                 Map.of(FruitTransaction.Operation.BALANCE, handler)
         );
 
-        assertEquals(handler,
+        Assertions.assertEquals(handler,
                 strategy.getHandler(FruitTransaction.Operation.BALANCE));
     }
 
@@ -24,7 +24,8 @@ class OperationStrategyImplTest {
                 Map.of(FruitTransaction.Operation.BALANCE, new BalanceOperation())
         );
 
-        assertThrows(RuntimeException.class,
+        Assertions.assertThrows(RuntimeException.class,
                 () -> strategy.getHandler(null));
     }
 }
+

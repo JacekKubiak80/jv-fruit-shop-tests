@@ -1,10 +1,10 @@
 package core.basesyntax.strategy;
 
 import core.basesyntax.model.FruitTransaction;
-import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 class ReturnOperationTest {
 
@@ -18,6 +18,7 @@ class ReturnOperationTest {
 
         new ReturnOperation().handle(tx, stock);
 
-        assertEquals(40, stock.get("apple"));
+        Assertions.assertEquals(40, stock.get("apple"));
     }
 }
+

@@ -9,10 +9,9 @@ import core.basesyntax.strategy.ReturnOperation;
 import core.basesyntax.strategy.SupplyOperation;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ShopServiceImplTest {
 
@@ -31,18 +30,41 @@ class ShopServiceImplTest {
 
     @Test
     void process_validTransactions_ok() {
-        shopService.process(List.of(
+        List<FruitTransaction> transactions = List.of(
                 new FruitTransaction(FruitTransaction.Operation.BALANCE, "apple", 100),
                 new FruitTransaction(FruitTransaction.Operation.PURCHASE, "apple", 30),
                 new FruitTransaction(FruitTransaction.Operation.RETURN, "apple", 10)
-        ));
+        );
 
-        assertEquals(80, shopService.getCurrentStock().get("apple"));
+        shopService.process(transactions);
+
+        Assertions.assertEquals(80, shopService.getCurrentStock().get("apple"));
     }
 
     @Test
     void process_nullList_throwsException() {
-        assertThrows(RuntimeException.class,
+        Assertions.assertThrows(RuntimeException.class,
                 () -> shopService.process(null));
     }
+
+    @Test
+    void process_nullTransactionInList_throwsException() {
+        List<FruitTransaction> transactions = List.of(
+                new FruitTransaction(FruitTransaction.Operation.BALANCE, "apple", 50),
+                null
+        );
+
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class,
+                () -> shopService.process(transactions));
+        Assertions.assertEquals("Transaction cannot be null", exception.getMessage());
+    }
+
+    @Test
+    void getCurrentStock_emptyInitially_ok() {
+        Assertions.assertTrue(shopService.getCurrentStock().isEmpty());
+    }
 }
+
+
+
+

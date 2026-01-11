@@ -3,7 +3,6 @@ package core.basesyntax.service;
 import core.basesyntax.model.FruitTransaction;
 import core.basesyntax.strategy.OperationHandler;
 import core.basesyntax.strategy.OperationStrategy;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,7 @@ public class ShopServiceImpl implements ShopService {
 
     public ShopServiceImpl(OperationStrategy strategy) {
         if (strategy == null) {
-            throw new RuntimeException("OperationStrategy is null");
+            throw new RuntimeException("OperationStrategy cannot be null");
         }
         this.strategy = strategy;
     }
@@ -22,23 +21,33 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public void process(List<FruitTransaction> transactions) {
         if (transactions == null) {
-            throw new RuntimeException("Transaction list is null");
+            throw new RuntimeException("Transaction list cannot be null");
         }
-        for (FruitTransaction transaction : transactions) {
+
+        for (int i = 0; i < transactions.size(); i++) {
+            FruitTransaction transaction = transactions.get(i);
             if (transaction == null) {
-                throw new RuntimeException("Transaction in the list is null");
+                throw new RuntimeException("Transaction cannot be null");
             }
-            OperationHandler handler = strategy.getHandler(transaction.getOperation());
+
+            FruitTransaction.Operation operation = transaction.getOperation();
+            if (operation == null) {
+                throw new RuntimeException("Operation cannot be null");
+            }
+
+            OperationHandler handler = strategy.getHandler(operation);
             if (handler == null) {
-                throw new RuntimeException("No handler found for operation: "
-                        + transaction.getOperation());
+                throw new RuntimeException(
+                        "No handler found for operation: " + operation);
             }
+
             handler.handle(transaction, stock);
         }
     }
 
     @Override
     public Map<String, Integer> getCurrentStock() {
-        return Collections.unmodifiableMap(new HashMap<>(stock));
+        return stock;
     }
 }
+
